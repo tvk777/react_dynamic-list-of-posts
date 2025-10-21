@@ -1,3 +1,5 @@
+/* eslint no-console: ["error", { allow: ["warn", "log", "error"] }] */
+
 import { useState, useEffect } from 'react';
 import classNames from 'classnames';
 
@@ -18,6 +20,7 @@ export const App = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setisLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openedPost, setOpenedPost] = useState<Post | null>(null);
 
@@ -38,11 +41,13 @@ export const App = () => {
   const onSelectUser = async (user: User) => {
     setSelectedUser(user);
     setisLoading(true);
+    setErrorMessage('');
     try {
       const postsData = await getPostsByUserid(user.id);
 
       setPosts(postsData);
     } catch (error) {
+      setErrorMessage('Something went wrong!');
     } finally {
       setisLoading(false);
     }
@@ -57,6 +62,9 @@ export const App = () => {
       return post;
     });
   };
+
+  const noPosts =
+    !errorMessage && !isLoading && selectedUser && posts.length === 0;
 
   return (
     <main className="section">
@@ -79,22 +87,28 @@ export const App = () => {
 
                 {isLoading && <Loader />}
 
-                <div
-                  className="notification is-danger"
-                  data-cy="PostsLoadingError"
-                >
-                  Something went wrong!
-                </div>
+                {errorMessage && (
+                  <div
+                    className="notification is-danger"
+                    data-cy="PostsLoadingError"
+                  >
+                    {errorMessage}
+                  </div>
+                )}
 
-                <div className="notification is-warning" data-cy="NoPostsYet">
-                  No posts yet
-                </div>
+                {noPosts && (
+                  <div className="notification is-warning" data-cy="NoPostsYet">
+                    No posts yet
+                  </div>
+                )}
 
-                <PostsList
-                  posts={posts}
-                  openedPost={openedPost}
-                  onOpenPost={onOpenPost}
-                />
+                {posts.length > 0 && (
+                  <PostsList
+                    posts={posts}
+                    openedPost={openedPost}
+                    onOpenPost={onOpenPost}
+                  />
+                )}
               </div>
             </div>
           </div>
