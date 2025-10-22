@@ -55,7 +55,10 @@ export const UserSelector: React.FC<Props> = ({
                 'is-active': user.id === selectedUser?.id,
               })}
               key={user.id}
-              onClick={() => handleClickUser(user)}
+              onClick={event => {
+                event.preventDefault();
+                handleClickUser(user);
+              }}
             >
               {user.name}
             </a>

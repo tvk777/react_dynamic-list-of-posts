@@ -1,9 +1,7 @@
-/* eslint no-console: ["error", { allow: ["warn", "log"] }] */
 import React, { useState } from 'react';
 import cn from 'classnames';
 import { Comment } from '../types/Comment';
 import { addComment } from '../api/api';
-// import { CommentData } from '../types/Comment';
 
 interface Props {
   postId: number;
@@ -21,6 +19,8 @@ export const NewCommentForm: React.FC<Props> = ({ postId, setComments }) => {
   const [addErrorMessage, setAddErrorMessage] = useState('');
 
   const clearForm = () => {
+    setName('');
+    setEmail('');
     setBody('');
     setAddErrorMessage('');
     setNameError('');
@@ -31,19 +31,19 @@ export const NewCommentForm: React.FC<Props> = ({ postId, setComments }) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!name) {
+    if (!name.trim()) {
       setNameError('Name is required');
     }
 
-    if (!email) {
+    if (!email.trim()) {
       setEmailError('Email is required');
     }
 
-    if (!body) {
+    if (!body.trim()) {
       setBodyError('Enter some text');
     }
 
-    if (!name || !email || !body) {
+    if (!name.trim() || !email.trim() || !body.trim()) {
       return;
     }
 
@@ -54,7 +54,7 @@ export const NewCommentForm: React.FC<Props> = ({ postId, setComments }) => {
       const newComment = await addComment({ postId, name, email, body });
 
       setComments(current => [...current, newComment]);
-      clearForm();
+      setBody('');
     } catch (error) {
       setAddErrorMessage('Unable add new comment');
     } finally {
