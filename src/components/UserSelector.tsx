@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import cn from 'classnames';
 import { User } from '../types/User';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 interface Props {
   users: User[];
@@ -14,6 +15,9 @@ export const UserSelector: React.FC<Props> = ({
   selectedUser,
 }) => {
   const [isActive, setIsActive] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(dropdownRef, () => setIsActive(false));
 
   const handleClickUser = (user: User) => {
     onSelectUser(user);
@@ -24,6 +28,7 @@ export const UserSelector: React.FC<Props> = ({
     <div
       data-cy="UserSelector"
       className={cn('dropdown', { 'is-active': isActive })}
+      ref={dropdownRef}
     >
       <div className="dropdown-trigger">
         <button
@@ -31,13 +36,11 @@ export const UserSelector: React.FC<Props> = ({
           className="button"
           aria-haspopup="true"
           aria-controls="dropdown-menu"
+          onClick={() => setIsActive(prev => !prev)}
         >
           <span>{selectedUser ? selectedUser.name : 'Choose a user'}</span>
 
-          <span
-            className="icon is-small"
-            onClick={() => setIsActive(prev => !prev)}
-          >
+          <span className="icon is-small">
             <i className="fas fa-angle-down" aria-hidden="true" />
           </span>
         </button>

@@ -12,15 +12,18 @@ import { PostDetails } from './components/PostDetails';
 import { UserSelector } from './components/UserSelector';
 import { Loader } from './components/Loader';
 import { User } from './types/User';
-import { getUsers } from './api/users';
 import { Post } from './types/Post';
-import { getPostsByUserid } from './api/posts';
+import { getUsers, getPostsByUserid, getCommentsByPostid } from './api/api';
+import { Comment } from './types/Comment';
 
 export const App = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [isLoading, setisLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [isPostsLoading, setIsPostsLoading] = useState(false);
+  const [isCommentsLoading, setIsCommentsLoading] = useState(false);
+  const [postsErrorMessage, setPostsErrorMessage] = useState('');
+  const [commentsErrorMessage, setCommentsErrorMessage] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openedPost, setOpenedPost] = useState<Post | null>(null);
 
@@ -39,21 +42,23 @@ export const App = () => {
   }, []);
 
   const onSelectUser = async (user: User) => {
+    setPosts([]);
     setSelectedUser(user);
-    setisLoading(true);
-    setErrorMessage('');
+    setOpenedPost(null);
+    setIsPostsLoading(true);
+    setPostsErrorMessage('');
     try {
       const postsData = await getPostsByUserid(user.id);
 
       setPosts(postsData);
     } catch (error) {
-      setErrorMessage('Something went wrong!');
+      setPostsErrorMessage('Something went wrong!');
     } finally {
-      setisLoading(false);
+      setIsPostsLoading(false);
     }
   };
 
-  const onOpenPost = (post: Post) => {
+  const onOpenPost = async (post: Post) => {
     setOpenedPost(prev => {
       if (prev?.id === post.id) {
         return null;
@@ -61,10 +66,21 @@ export const App = () => {
 
       return post;
     });
+    setIsCommentsLoading(true);
+    setCommentsErrorMessage('');
+    try {
+      const commentsData = await getCommentsByPostid(post.id);
+
+      setComments(commentsData);
+    } catch (error) {
+      setCommentsErrorMessage('Something went wrong!');
+    } finally {
+      setIsCommentsLoading(false);
+    }
   };
 
   const noPosts =
-    !errorMessage && !isLoading && selectedUser && posts.length === 0;
+    !postsErrorMessage && !isPostsLoading && selectedUser && posts.length === 0;
 
   return (
     <main className="section">
@@ -85,14 +101,14 @@ export const App = () => {
                   <p data-cy="NoSelectedUser">No user selected</p>
                 )}
 
-                {isLoading && <Loader />}
+                {isPostsLoading && <Loader />}
 
-                {errorMessage && (
+                {postsErrorMessage && (
                   <div
                     className="notification is-danger"
                     data-cy="PostsLoadingError"
                   >
-                    {errorMessage}
+                    {postsErrorMessage}
                   </div>
                 )}
 
@@ -125,7 +141,13 @@ export const App = () => {
           >
             {openedPost && (
               <div className="tile is-child box is-success ">
-                <PostDetails post={openedPost} />
+                <PostDetails
+                  post={openedPost}
+                  comments={comments}
+                  setComments={setComments}
+                  isLoading={isCommentsLoading}
+                  errorMessage={commentsErrorMessage}
+                />
               </div>
             )}
           </div>
