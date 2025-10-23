@@ -197,7 +197,9 @@ export const NewCommentForm: React.FC<Props> = ({ postId, setComments }) => {
           </button>
         </div>
       </div>
-      {addErrorMessage && <div>{addErrorMessage}</div>}
+      {addErrorMessage && (
+        <div className="notification is-danger">{addErrorMessage}</div>
+      )}
     </form>
   );
 };

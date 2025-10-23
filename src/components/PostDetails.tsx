@@ -29,6 +29,8 @@ export const PostDetails: React.FC<Props> = ({
 
   const handleDeleteComment = async (commentId: number) => {
     setDeleteErrorId(null);
+    const savedComments = [...comments];
+
     try {
       setComments(current =>
         current.filter(comment => comment.id !== commentId),
@@ -37,6 +39,7 @@ export const PostDetails: React.FC<Props> = ({
       await deleteComment(commentId);
     } catch (error) {
       setDeleteErrorId(commentId);
+      setComments(savedComments);
     } finally {
     }
   };
@@ -92,7 +95,9 @@ export const PostDetails: React.FC<Props> = ({
                   </div>
                 </article>
                 {deleteErrorId === comment.id && (
-                  <div>Unable delete comment</div>
+                  <div className="notification is-danger">
+                    Unable delete comment
+                  </div>
                 )}
               </React.Fragment>
             ))}

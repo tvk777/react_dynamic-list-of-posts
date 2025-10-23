@@ -58,7 +58,7 @@ export const App = () => {
     }
   };
 
-  const onOpenPost = async (post: Post) => {
+  const onOpenPost = (post: Post) => {
     setOpenedPost(prev => {
       if (prev?.id === post.id) {
         return null;
@@ -66,6 +66,9 @@ export const App = () => {
 
       return post;
     });
+  };
+
+  const fetchComments = async (post: Post) => {
     setIsCommentsLoading(true);
     setCommentsErrorMessage('');
     try {
@@ -78,6 +81,12 @@ export const App = () => {
       setIsCommentsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (openedPost) {
+      fetchComments(openedPost);
+    }
+  }, [openedPost]);
 
   const noPosts =
     !postsErrorMessage && !isPostsLoading && selectedUser && posts.length === 0;
